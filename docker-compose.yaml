@@ -1,0 +1,32 @@
+version: '2'
+services:
+  server:
+    build: .
+    command: yarn dev
+    volumes:
+      - .:/usr/app/
+      - /usr/app/node_modules
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://tenant@postgres/tenants
+  postgres:
+    image: postgres:9.6.2-alpine
+    environment:
+      POSTGRES_USER: todoapp
+      POSTGRES_DB: todos
+
+  jenkins:
+    image: docker.io/bitnami/jenkins:2
+    ports:
+      - '80:8080'
+    environment:
+      - JENKINS_PASSWORD=bitnami
+    volumes:
+      - 'jenkins_data:/bitnami/jenkins'
+
+volumes:
+  jenkins_data:
+    driver: local
