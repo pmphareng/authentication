@@ -39,13 +39,7 @@ pipeline {
                 }
             }
         }
-        stage('Remove local images') {
-            steps {
-                echo '=== Delete the local docker images ==='
-                sh("docker rmi -f mphareng/authenticator:latest || :")
-                sh("docker rmi -f mphareng/authenticator:$SHORT_COMMIT || :")
-            }
-        }
+        
         // stage('Test Application') {
         //     steps {
         //         echo '=== Testing Petclinic Application ==='
