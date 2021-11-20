@@ -36,7 +36,6 @@ node {
 
     stage('Clone repository') {
         /* Let's make sure we have the repository cloned to our workspace */
-
         checkout scm
     }
 
@@ -45,7 +44,7 @@ node {
          * docker build on the command line */
 
         /* docker requires docker pipeline plugin*/
-        app = docker.build("mphareng/authenticator")
+        app = docker.build("mphareng/authentication_server")
     }
 
     stage('Test image') {
