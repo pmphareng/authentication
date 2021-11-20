@@ -40,17 +40,17 @@ pipeline {
             }
         }
         
-        // stage('Test Application') {
-        //     steps {
-        //         echo '=== Testing Petclinic Application ==='
-        //         sh 'mvn test'
-        //     }
-        //     post {
-        //         always {
-        //             junit 'target/surefire-reports/*.xml'
-        //         }
-        //     }
-        // }
+        stage('Test Application') {
+            steps {
+                echo '=== Testing  Application ==='
+                // sh 'mvn test'
+            }
+            // post {
+            //     always {
+            //         junit 'target/surefire-reports/*.xml'
+            //     }
+            // }
+        }
     }
 }
 
