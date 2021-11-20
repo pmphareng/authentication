@@ -1,56 +1,36 @@
-pipeline {
-    agent any
-    triggers {
-        pollSCM "* * * * *"
+node {
+    def app
+
+    stage('Clone repository') {
+        /* Let's make sure we have the repository cloned to our workspace */
+
+        checkout scm
     }
-    stages {
-        stage('Build Application') { 
-            steps {
-                echo 'executing yarn'
-                nodejs('Node-16.3.0'){
-                    sh 'yarn install'
-                }
-            }
+
+    stage('Build image') {
+        /* This builds the actual image; synonymous to
+         * docker build on the command line */
+
+        app = docker.build("mphareng/authenticator")
+    }
+
+    stage('Test image') {
+        /* Ideally, we would run a test framework against our image.
+         * For this example, we're using a Volkswagen-type approach ;-) */
+
+        app.inside {
+            sh 'echo "Tests passed"'
         }
-        stage('Build Docker Image') {
-            when {
-                branch 'master'
-            }
-            steps {
-                echo '=== Building Authenticator Docker Image ==='
-                script {
-                    app = docker.build("mphareng/authenticator")
-                }
-            }
-        }
-        stage('Push Docker Image') {
-            when {
-                branch 'master'
-            }
-            steps {
-                echo '=== Pushing Authenticator Docker Image ==='
-                script {
-                    GIT_COMMIT_HASH = sh (script: "git log -n 1 --pretty=format:'%H'", returnStdout: true)
-                    SHORT_COMMIT = "${GIT_COMMIT_HASH[0..7]}"
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
-                        app.push("$SHORT_COMMIT")
-                        app.push("latest")
-                    }
-                }
-            }
-        }
-        
-        stage('Test Application') {
-            steps {
-                echo '=== Testing  Application ==='
-                // sh 'mvn test'
-            }
-            // post {
-            //     always {
-            //         junit 'target/surefire-reports/*.xml'
-            //     }
-            // }
+    }
+
+    stage('Push image') {
+        /* Finally, we'll push the image with two tags:
+         * First, the incremental build number from Jenkins
+         * Second, the 'latest' tag.
+         * Pushing multiple tags is cheap, as all the layers are reused. */
+        docker.withRegistry('https://registry.hub.docker.com', 'dockerHubCredentials') {
+            app.push("${env.BUILD_NUMBER}")
+            app.push("latest")
         }
     }
 }
-
